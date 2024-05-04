@@ -37,6 +37,7 @@ public class WebConfig implements WebMvcConfigurer {
      * @param registry
      */
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //Add static files
         registry.addResourceHandler(
                 "/webjars/**",
                 "/img/**",
@@ -47,6 +48,11 @@ public class WebConfig implements WebMvcConfigurer {
                         "classpath:/static/img/",
                         "classpath:/static/css/",
                         "classpath:/static/js/");
+
+        //Add Swagger
+        registry.addResourceHandler("/swagger-ui/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+                .resourceChain(false);
     }
 
 }
