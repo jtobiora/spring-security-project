@@ -4,6 +4,7 @@ import com.security.demo.security.CustomAccessDeniedHandler;
 import com.security.demo.security.JwtAuthenticationEntryPoint;
 import com.security.demo.service.CustomAuthenticationProviderService;
 import com.security.demo.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,18 +25,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         jsr250Enabled = true,
         prePostEnabled = true
 )
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    @Autowired
-    private CustomAuthenticationProviderService authenticationProviderService;
-
-    @Autowired
-    private CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final CustomAuthenticationProviderService authenticationProviderService;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Override
     public void configure(AuthenticationManagerBuilder builder) throws Exception {

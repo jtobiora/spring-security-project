@@ -1,9 +1,9 @@
 package com.security.demo.model;
 
-import com.security.demo.model.audit.DateAudit;
-import lombok.Data;
+import com.security.demo.model.audit.BaseEntity;
+
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
-import org.springframework.context.annotation.Lazy;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -22,7 +23,10 @@ import java.util.Set;
                 "email"
         })
 })
-public class User extends DateAudit {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,10 +55,6 @@ public class User extends DateAudit {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
-
-    public User() {
-
-    }
 
     public User(String name, String username, String email, String password) {
         this.name = name;
