@@ -87,22 +87,7 @@ public class JwtTokenProvider {
             Claims userClaims = null;
 
             try {
-                userClaims = (Claims)Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-            } catch (ExpiredJwtException var4) {
-                log.error("Unable to parse token", var4);
-                return null;
-            } catch (UnsupportedJwtException var5) {
-                log.error("Unable to parse token", var5);
-                return null;
-            } catch (MalformedJwtException var6) {
-                log.error("Unable to parse token", var6);
-                return null;
-            } catch (SignatureException var7) {
-                log.error("Unable to parse token", var7);
-                return null;
-            } catch (IllegalArgumentException var8) {
-                log.error("Unable to parse token", var8);
-                return null;
+                userClaims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
             } catch (Exception var9) {
                 log.error("Unable to parse token", var9);
                 return null;
@@ -110,10 +95,10 @@ public class JwtTokenProvider {
 
             UserPrincipal userPrincipal = new UserPrincipal();
             userPrincipal.setId(Long.valueOf(String.valueOf(userClaims.get("id"))));
-            userPrincipal.setEmail((String)userClaims.get("email", String.class));
-            userPrincipal.setName((String)userClaims.get("name", String.class));
-            userPrincipal.setUsername((String)userClaims.get("username", String.class));
-            userPrincipal.setSessionId((String)userClaims.get("sessionId", String.class));
+            userPrincipal.setEmail(userClaims.get("email", String.class));
+            userPrincipal.setName(userClaims.get("name", String.class));
+            userPrincipal.setUsername(userClaims.get("username", String.class));
+            userPrincipal.setSessionId(userClaims.get("sessionId", String.class));
             userPrincipal.setAuthorities((Collection)userClaims.get("authorities", ArrayList.class));
 
             return userPrincipal.getId() != null ? userPrincipal : null;

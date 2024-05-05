@@ -13,7 +13,12 @@ import com.security.demo.model.User;
 import com.security.demo.service.RoleService;
 import com.security.demo.service.UserService;
 import com.security.demo.service.redis.TokenCacheService;
+import com.security.demo.service.redis.UserLoginCacheService;
+import com.security.demo.service.redis.UserTokenCacheService;
+import com.security.demo.service.sessions.SessionManager;
 import io.jsonwebtoken.lang.Assert;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,24 +38,26 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
+@Slf4j
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
 
-    @Autowired
-    RoleService roleService;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
-    @Autowired
-    JwtTokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserService userService;
+    private final JwtTokenProvider tokenProvider;
 
-    @Autowired
-    private TokenCacheService tokenCacheService;
+    private final UserService userService;
+
+    private final TokenCacheService tokenCacheService;
+
+    private final UserTokenCacheService userTokenCacheService;
+
+    private final UserLoginCacheService userLoginCacheService;
+    private final SessionManager sessionManager;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, HttpSession httpSession) {
@@ -67,13 +74,13 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authenticated);
 
             //generate JWT Token
-            Map<String,String> tokenMap = tokenProvider.generateJWTToken(authenticated,httpSession);
+            Map<String, String> tokenMap = tokenProvider.generateJWTToken(authenticated, httpSession);
 
             //save the user token in redis cache
-            tokenCacheService.saveUserToken(tokenMap.get("sessionId"),tokenMap.get("token"));
+            tokenCacheService.saveUserToken(tokenMap.get("sessionId"), tokenMap.get("token"));
 
             //set the user as logged
-            tokenCacheService.setUserAsLogged(loginRequest.getEmail(),tokenMap.get("sessionId"));
+            tokenCacheService.setUserAsLogged(loginRequest.getEmail(), tokenMap.get("sessionId"));
 
             return ResponseEntity.ok(new JwtAuthenticationResponse(tokenMap.get("token")));
         }
@@ -82,16 +89,15 @@ public class AuthController {
     }
 
     @GetMapping("/show/{sessionId}")
-    public ResponseEntity<?> findToken(@PathVariable String sessionId){
-        return ResponseEntity.ok(tokenCacheService.findUserToken(sessionId,"key"));
+    public ResponseEntity<?> findToken(@PathVariable String sessionId) {
+        return ResponseEntity.ok(tokenCacheService.findUserToken(sessionId, "key"));
     }
-
 
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
 
-        if(userService.existsByEmail(signUpRequest.getEmail())) {
+        if (userService.existsByEmail(signUpRequest.getEmail())) {
             return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
                     HttpStatus.BAD_REQUEST);
         }

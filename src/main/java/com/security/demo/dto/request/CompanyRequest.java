@@ -11,7 +11,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyRequest {
-    private Long id;
     @NotBlank(message = "Company name cannot be empty")
     private String companyName;
     @NotBlank(message = "Rc Number cannot be empty")

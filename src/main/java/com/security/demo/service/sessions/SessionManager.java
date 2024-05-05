@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SessionManager {
 
-    private static final String KEY = "mysession:sessions:expires:";
+    private static final String KEY = "my-session:sessions:expires:";
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -39,7 +39,7 @@ public class SessionManager {
     }
 
     public void deleteSession(String sessionId) {
-
+        log.debug("Deleting user session {}",  KEY+sessionId);
         hashOperations.getOperations().delete(KEY+sessionId);
     }
 }

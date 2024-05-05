@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/companies")
@@ -37,8 +38,13 @@ public class CompanyController {
     }
 
     @GetMapping("/{companyId}")
-    public ResponseEntity getCompanyById(@PathVariable Long companyId,@CurrentUser UserPrincipal currentUser){
-        return null;
+    public ResponseEntity<Company> getCompanyById(@PathVariable Long companyId,@CurrentUser UserPrincipal currentUser){
+        return ResponseEntity.ok(companyService.getCompany(companyId));
+    }
+
+    @GetMapping("/findAll")
+    public ResponseEntity<List<Company>> getAllCompanies(){
+        return ResponseEntity.ok(companyService.getAllCompanies());
     }
 }
 

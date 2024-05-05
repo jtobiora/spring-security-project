@@ -45,6 +45,7 @@ public class CustomInterceptor extends HandlerInterceptorAdapter {
 
         try {
             String jwtToken = getJwtFromRequest(request);
+            log.info("Intercepted user request for token {}.....", jwtToken);
             if (StringUtils.hasText(jwtToken) && tokenProvider.validateToken(jwtToken)) {
                 Long userId = tokenProvider.getUserIdFromJWT(jwtToken);
 
@@ -58,6 +59,8 @@ public class CustomInterceptor extends HandlerInterceptorAdapter {
                 }
 
                 if (!sessionManager.isValidSession(principal.getSessionId())) {
+                    //destroy the token too
+                    tokenCacheService.deleteUserToken(principal.getSessionId());
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.getWriter().print(new Gson().toJson(new ErrorDetails(new Date(),String.valueOf(HttpServletResponse.SC_FORBIDDEN),Errors.EXPIRED_SESSION.getValue())));
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -65,18 +68,18 @@ public class CustomInterceptor extends HandlerInterceptorAdapter {
                     return false;
                 }
 
-                if (!tokenCacheService.isValidUserToken(jwtToken, principal.getSessionId())) {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().print(new Gson().toJson(new ErrorDetails(new Date(), String.valueOf(HttpServletResponse.SC_FORBIDDEN), Errors.EXPIRED_TOKEN.getValue())));
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-                    return false;
-                }
+//                if (!tokenCacheService.isValidUserToken(jwtToken, principal.getSessionId())) {
+//                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                    response.getWriter().print(new Gson().toJson(new ErrorDetails(new Date(), String.valueOf(HttpServletResponse.SC_FORBIDDEN), Errors.EXPIRED_TOKEN.getValue())));
+//                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//                    response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+//                    return false;
+//                }
 
                 UserDetails userDetails = customUserDetailsService.loadUserById(userId);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                sessionManager.updateTimeout(principal.getSessionId());
+              //  sessionManager.updateTimeout(principal.getSessionId());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 return true;
